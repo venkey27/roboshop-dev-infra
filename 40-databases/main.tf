@@ -83,3 +83,45 @@ resource "terraform_data" "redis" { # # here we are using terraform data for pro
     ]                                                        # - ansible-playbook -e component=$component -e env=$environment roboshop.yaml
   }
 }
+
+
+# creating mongodb rabbitmq 
+resource "aws_instance" "rabbitmq" {             
+  ami           = data.aws_ami.joindevops.id      
+  instance_type = "t3.micro"                     
+  vpc_security_group_ids = [local.rabbitmq_sg_id]  
+  subnet_id = local.database_subnet_id
+  
+
+  tags = merge(
+    {
+        Name = "${local.common_name}-rabbitmq"
+    },
+    local.common_tags
+  )
+}
+
+resource "terraform_data" "rabbitmq" { # # here we are using terraform data for provisioner only 
+  triggers_replace = [               # trigger means when to run.  also can control terraform data by triggers
+    aws_instance.rabbitmq.id  #  triggers_replace = aws_instance.redis.id : if any chnage redis then triggers work, no changes in redis then triggers dont work
+  ]
+
+  connection {
+    type        = "ssh"
+    user        = "ec2-user"
+    password = "DevOps321"
+    host        = aws_instance.rabbitmq.private_ip  # only private because mongodb will not have public ip address because it is in private subnet
+  }
+
+  provisioner "file" { # purpose is to copy local file into remote resource 
+    source      = "bootstrap.sh"
+    destination = "/tmp/bootstrap.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/bootstrap.sh",
+      "sudo sh /tmp/bootstrap.sh rabbitmq ${var.environment}"   # when we pass redis and environment here, they go in bootstrap 15 line(ansible excution)
+    ]                                                        # - ansible-playbook -e component=$component -e env=$environment roboshop.yaml
+  }
+}
