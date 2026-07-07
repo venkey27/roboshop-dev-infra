@@ -8,9 +8,9 @@ terraform {
    # remote state storage location
   backend "s3" {
     bucket         = "remote-state-ven-dev"
-    key            = "roboshop-sg.tfstate" # key means naming the statefile.     <name>.tfstate
+    key            = "roboshop-vpc.tfstate" # key means naming the statefile.     <name>.tfstate
     region         = "us-east-1"
-    encrypt        = true # Enables server-side encryption of the state file in S3
+    encrypt        = true
     use_lockfile   = true # Enables native S3 state locking (Terraform 1.10+)
   }
 
