@@ -18,10 +18,10 @@ resource "aws_instance" "mongodb" {
 
 # Its main purpose is to act as a placeholder or trigger provisioners or to run local commands, run scripts, or manage lifecycle behaviors.
 
-resource "terraform_data" "mongodb" { # # here we are using terraform data for provisioner only 
-  triggers_replace = [               # trigger means when to run.  also can control terraform data by triggers
-    aws_instance.mongodb.id
-  ]
+resource "terraform_data" "mongodb" { # # here we are using terraform data for provisioner only, trigger means when to run.  triggers can control terraform data 
+  triggers_replace = [               # If the MongoDB instance doesn't change, running terraform apply 100 times will do absolutely nothing to
+    aws_instance.mongodb.id          #  the database or the terraform_data block.Terraform will just say: "No changes. Infrastructure is up-to-date."
+  ]         #  triggers_replace = aws_instance.mongodb.id : if any chnage mongodb then triggers work, no changes in mongodb then triggers dont work
 
   connection {
     type        = "ssh"
@@ -61,7 +61,7 @@ resource "aws_instance" "redis" {
 
 resource "terraform_data" "redis" { # # here we are using terraform data for provisioner only 
   triggers_replace = [               # trigger means when to run.  also can control terraform data by triggers
-    aws_instance.redis.id
+    aws_instance.redis.id  #  triggers_replace = aws_instance.redis.id : if any chnage redis then triggers work, no changes in redis then triggers dont work
   ]
 
   connection {
