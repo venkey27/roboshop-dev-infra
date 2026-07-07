@@ -1,14 +1,13 @@
 #!/bin/bash
+                                     # partition_number , extend_size are place holders and supply value to this place holders by main.tf
+growpart /dev/nvme0n1 ${partition_number}                     # partition_number is from main.tf
+pvresize /dev/nvme0n1p${partition_number}   
+lvextend -r -L +${extend_size}G /dev/mapper/RootVG-homeVol # extend_size is from main.tf
 
-growpart /dev/nvme0n1 ${partition_number}
-lvextend -r -L +${extend_size}G /dev/mapper/RootVG-homeVol
-xfs_growfs /home
-
-yum install -y yum-utils
+yum install -y yum-utils  # we have to give terraform for bastion 
 yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+rpm --import https://rpm.releases.hashicorp.com/gpg
 yum -y install terraform
-
-# partition_number , extend_size are place holders and supply value to this place holders by main.tf
 
 # Because your databases are private, your laptop cannot deploy them. You will have to SSH into the Bastion host, go into that 40-databases -
 # - folder, and run terraform apply from inside the Bastion.
