@@ -17,7 +17,7 @@ resource "aws_instance" "mongodb" {
 
 # Its main purpose is to act as a placeholder or trigger provisioners or to run local commands, run scripts, or manage lifecycle behaviors.
 
-resource "terraform_data" "mongodb" {
+resource "terraform_data" "mongodb" { # # here we are using terraform data for provisioner only 
   triggers_replace = [               # trigger means when to run.  also can control terraform data by triggers
     aws_instance.mongodb.id
   ]
@@ -30,7 +30,7 @@ resource "terraform_data" "mongodb" {
   }
 
   provisioner "file" { # purpose is to copy local file into remote resource 
-    source      = "bootstrap.sh" 
+    source      = "bootstrap.sh"
     destination = "/tmp/bootstrap.sh"
   }
 
