@@ -1,7 +1,9 @@
+# we are giving bastion role administrator access  so it can create other AWS RESOURCES (INSTANCE CREATION, UPDATE, DELETE)
+
 resource "aws_iam_role" "bastion" {      #creating iam role for bastion
   name = "${local.common_name}-bastion"
 
-  # Terraform's "jsonencode" function converts a
+  # Terraform's "jsonencode" function converts a               
   # Terraform expression result to valid JSON syntax.
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
