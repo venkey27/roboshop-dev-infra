@@ -125,3 +125,45 @@ resource "terraform_data" "rabbitmq" { # # here we are using terraform data for 
     ]                                                        # - ansible-playbook -e component=$component -e env=$environment roboshop.yaml
   }
 }
+
+
+# creating mongodb mysql 
+resource "aws_instance" "mysql" {             
+  ami           = data.aws_ami.joindevops.id      
+  instance_type = "t3.micro"                     
+  vpc_security_group_ids = [local.mysql_sg_id]  
+  subnet_id = local.database_subnet_id
+  iam_instance_profile = aws_iam_instance_profile.mysql.name # attaching an IAM role to an EC2 instance
+
+  tags = merge(
+    {
+        Name = "${local.common_name}-mysql"
+    },
+    local.common_tags
+  )
+}
+
+resource "terraform_data" "mysql" { # # here we are using terraform data for provisioner only 
+  triggers_replace = [               # trigger means when to run.  also can control terraform data by triggers
+    aws_instance.mysql.id  #  triggers_replace = aws_instance.redis.id : if any chnage redis then triggers work, no changes in redis then triggers dont work
+  ]
+
+  connection {
+    type        = "ssh"
+    user        = "ec2-user"
+    password = "DevOps321"
+    host        = aws_instance.mysql.private_ip  # only private because mongodb will not have public ip address because it is in private subnet
+  }
+
+  provisioner "file" { # purpose is to copy local file into remote resource 
+    source      = "bootstrap.sh"
+    destination = "/tmp/bootstrap.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/bootstrap.sh",
+      "sudo sh /tmp/bootstrap.sh mysql ${var.environment}"   # when we pass redis and environment here, they go in bootstrap 15 line(ansible excution)
+    ]                                                        # - ansible-playbook -e component=$component -e env=$environment roboshop.yaml
+  }
+}

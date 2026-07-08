@@ -3,7 +3,7 @@ resource "aws_instance" "bastion" {              #A Bastion host (also called a 
   instance_type = "t3.micro"                     # Because it sits on the public internet, it is a high-risk target.
   vpc_security_group_ids = [local.bastion_sg_id]  # is used to attach the specific Bastion firewall rules (security group) to this EC2 instance.
   subnet_id = local.public_subnet_id
-  iam_instance_profile = aws_iam_instance_profile.bastion.name
+  iam_instance_profile = aws_iam_instance_profile.bastion.name # attaching an IAM role to an EC2 instance
 
   # we will only get user_data option at the  creation of instance only. once instance got created we can change user data
   user_data = templatefile("${path.module}/bastion.sh.tftpl", {    # path.module=present location # tftp = terraform template
