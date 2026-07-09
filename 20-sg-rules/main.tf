@@ -288,7 +288,7 @@ resource "aws_security_group_rule" "frontend_alb_http" {           # http for te
   from_port         = 80                                   
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
+  cidr_blocks = ["0.0.0.0/0"]                                         #allow traffic from any IP address on the internet
   security_group_id = local.frontend_alb_sg_id
 }
 
