@@ -34,9 +34,9 @@ resource "aws_lb_listener" "http" {
 
 resource "aws_route53_record" "www" {
   zone_id = var.zone_id
-  name    = "*.backend-alb-${var.environment}.exptrack.shop" # *.backend-alb-dev.exptrack.shop
+  name    = "*.backend-alb-${var.environment}.exptrack.shop" # *.backend-alb-dev.exptrack.shop 
   type    = "A"
-
+                                            
   alias {
     # AWS details
     name                   = aws_lb.backend_alb.dns_name
