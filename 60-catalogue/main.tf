@@ -50,14 +50,14 @@ resource "aws_ec2_instance_state" "catalogue" {
 
 # resource allows the creation of an Amazon Machine Image (AMI)
 resource "aws_ami_from_instance" "catalogue" {
-  name               = "${local.common_name}-catalogue-${var.app_version}-${aws.instance.catalogue.id}"  # roboshop-dev-catalogue-v3-instance-id
-  source_instance_id = aws.instance.catalogue.id
+  name               = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}"  # roboshop-dev-catalogue-v3-instance-id
+  source_instance_id = aws_instance.catalogue.id
   depends_on = [ aws_ec2_instance_state.catalogue ]                # means when "aws_ec2_instance_state" "catalogue" INSTANCE STOPS completely , 
                                                          # then after "aws_ami_from_instance" "catalogue" configuration will run and creates AMI
 
   tags = merge(
     {
-        Name = "${local.common_name}-catalogue-${var.app_version}-${aws.instance.catalogue.id}"
+        Name = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}"
     },
     local.common_tags
   )
