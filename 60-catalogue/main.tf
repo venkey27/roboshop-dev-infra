@@ -39,3 +39,11 @@ resource "terraform_data" "catalogue" { # # here we are using terraform data for
     ]                                                        # - ansible-playbook -e component=$component -e env=$environment roboshop.yaml
   }
 }
+
+# 2. Control the running state explicitly
+resource "aws_ec2_instance_state" "catalogue" {
+  instance_id = aws_instance.catalogue.id
+  state       = "stopped" # Allowed values: "running" or "stopped" , state =  we can stop or run the instance state 
+  depends_on = [ terraform_data.catalogue ] # means when terraform_data" "catalogue" configuration is done, 
+                                            # after then "aws_ec2_instance_state" "catalogue" will have to run and stop the instaance 
+}
