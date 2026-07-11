@@ -185,7 +185,7 @@ resource "aws_autoscaling_policy" "catalogue" {
   }
 }
 
-#create routing rules for your Application Load Balancer (ALB).
+#create Listener rules for your Application Load Balancer (ALB).
 resource "aws_lb_listener_rule" "catalogue" { # you are telling the Application Load Balancer how to route traffic to your different 
   listener_arn = local.backend_alb_listener_arn                                         #microservices (like your catalogue service).
   priority     = 10
