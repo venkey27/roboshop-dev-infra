@@ -212,4 +212,4 @@ resource "terraform_data" "catalogue_delete" { # to delete the 1st stopped catal
   provisioner "local-exec" {
     command = "aws ec2 terminate-instances --instance-ids ${aws_instance.catalogue.id}"
   }
-}
+}  # Terraform provisioners (like local-exec), the command argument always requires a string, not a list.
