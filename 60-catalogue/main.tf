@@ -126,11 +126,11 @@ resource "aws_lb_target_group" "catalogue" {  # target consist of instances
 # resource allows the creation of an autoscaling
 resource "aws_autoscaling_group" "catalogue" {
   name                      = "${local.common_name}-catalogue"
-  max_size                  = 10
-  min_size                  = 1
+  max_size                  = 10                      # maxmimum number can autosacling can create 10 instances
+  min_size                  = 1                       # always should maintian  2 instances 
   health_check_grace_period = 120                     # 120 = 2 min, do the health check after 2 minutes of instances got created 
   health_check_type         = "ELB"                   # load balancer will do health check
-  desired_capacity          = 2
+  desired_capacity          = 2                       # for now create 2 instances 
   force_delete              = false                   # after delation of instances then auto-sacling will have to delete 
 
   launch_template {
@@ -182,5 +182,34 @@ resource "aws_autoscaling_policy" "catalogue" {
     }
 
     target_value = 75.0
+  }
+}
+
+#create routing rules for your Application Load Balancer (ALB).
+resource "aws_lb_listener_rule" "catalogue" { # you are telling the Application Load Balancer how to route traffic to your different 
+  listener_arn = local.backend_alb_listener_arn                                         #microservices (like your catalogue service).
+  priority     = 10
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.catalogue.arn   # Purpose: THEN do this. Because the condition matched, the Load Balancer says: 
+  }                                                        #"Okay, take this traffic and forward it straight to the catalogue target group."
+
+  condition {
+    host_header {
+      values = ["catalogue.backend-alb-${var.environment}.${var.domain_name}"]
+    }  # Purpose: This checks the incoming traffic. IF a user types catalogue.backend-alb-dev-exptrack.shop into their browser, 
+  }    # this condition evaluates to True.
+}
+
+resource "terraform_data" "catalogue_delete" {
+  triggers_replace = [
+    aws_instance.catalogue.id
+  ]
+  depends_on = [aws_autoscaling_policy.catalogue]
+
+  # executes where terraform is running
+  provisioner "local-exec" {
+    command = "aws ec2 terminate-instances --instance-ids ${aws_instance.catalogue.id}"
   }
 }
