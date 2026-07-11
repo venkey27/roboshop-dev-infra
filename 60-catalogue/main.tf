@@ -62,3 +62,43 @@ resource "aws_ami_from_instance" "catalogue" {
     local.common_tags
   )
 }
+
+resource "aws_launch_template" "catalogue" {
+  name = "${local.common_name}-catalogue"    # form catalogue ami id
+
+  image_id = aws_ami_from_instance.catalogue.id
+
+  instance_initiated_shutdown_behavior = "terminate"  # we get 2 options stop or terminate, we dont use stop because we have to pay extra money
+
+  instance_type = "t3.micro"
+
+  vpc_security_group_ids = [local.catalogue_sg_id]
+
+  update_default_version = true  # if lunch template is updated then take eww template by defult  
+
+   # Once the instances are created, these will become instance tags
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = merge(
+      {
+          Name = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}"
+      },
+      local.common_tags
+    )
+  }
+
+  # Once the instances are created, these will become volume tags
+  tag_specifications {
+    resource_type = "volume"
+
+    tags = merge(
+      {
+          Name = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}"
+      },
+      local.common_tags
+    )
+  }
+
+  
+}
