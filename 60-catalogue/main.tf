@@ -102,7 +102,8 @@ resource "aws_launch_template" "catalogue" {
   }  
 }
 
-resource "aws_lb_target_group" "catalogue" {
+# resource allows the creation of an Target group
+resource "aws_lb_target_group" "catalogue" {  # target consist of instances 
   name     = "${local.common_name}-catalogue"
   port     = 8080
   protocol = "HTTP"
@@ -121,3 +122,5 @@ resource "aws_lb_target_group" "catalogue" {
     unhealthy_threshold = 2     #  2 consecutive  health check fails then instance is not in good condition
   }
 }
+
+
