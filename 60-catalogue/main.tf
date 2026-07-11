@@ -202,7 +202,7 @@ resource "aws_lb_listener_rule" "catalogue" { # you are telling the Application 
   }    # this condition evaluates to True.
 }
 
-resource "terraform_data" "catalogue_delete" {
+resource "terraform_data" "catalogue_delete" { # to delete the 1st stopped catalogue instance to create AMI
   triggers_replace = [
     aws_instance.catalogue.id
   ]
