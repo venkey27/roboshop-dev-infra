@@ -40,7 +40,7 @@ resource "terraform_data" "catalogue" {          # here we are using terraform d
   }
 }
 
-# 2. Control the running state explicitly
+# Control the running state explicitly
 resource "aws_ec2_instance_state" "catalogue" {
   instance_id = aws_instance.catalogue.id
   state       = "stopped"                          # Allowed values: "running" or "stopped" , state =  we can stop or run the instance state 
@@ -123,4 +123,64 @@ resource "aws_lb_target_group" "catalogue" {  # target consist of instances
   }
 }
 
+# resource allows the creation of an autoscaling
+resource "aws_autoscaling_group" "catalogue" {
+  name                      = "${local.common_name}-catalogue"
+  max_size                  = 10
+  min_size                  = 1
+  health_check_grace_period = 120                     # 120 = 2 min, do the health check after 2 minutes of instances got created 
+  health_check_type         = "ELB"                   # load balancer will do health check
+  desired_capacity          = 2
+  force_delete              = false                   # after delation of instances then auto-sacling will have to delete 
 
+  launch_template {
+    id      = aws_launch_template.catalogue.id
+    version = "$Latest"
+  }
+
+  vpc_zone_identifier       = [local.private_subnet_id]
+
+  target_group_arns = [aws_lb_target_group.catalogue.arn] # Autoscaling launches into specific target group
+
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 50
+    }
+    triggers = ["launch_template"]
+  }
+
+  dynamic "tag" {
+    for_each = merge(
+      {
+        Name = "${local.common_name}-catalogue"
+      },
+      local.common_tags
+    )
+    content{
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
+
+  # with in 15min autoscaling should be successful to launch instances
+  timeouts {
+    delete = "15m"
+  }
+}
+
+# auto-scaling policy creation for average cpu utilization 
+resource "aws_autoscaling_policy" "catalogue" {
+  autoscaling_group_name = aws_autoscaling_group.catalogue.name
+  name                   = "${local.common_name}-catalogue"
+  policy_type            = "TargetTrackingScaling"
+  estimated_instance_warmup = 120
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+
+    target_value = 75.0
+  }
+}
