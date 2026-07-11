@@ -43,13 +43,13 @@ resource "terraform_data" "catalogue" {          # here we are using terraform d
 # 2. Control the running state explicitly
 resource "aws_ec2_instance_state" "catalogue" {
   instance_id = aws_instance.catalogue.id
-  state       = "stopped" # Allowed values: "running" or "stopped" , state =  we can stop or run the instance state 
+  state       = "stopped"                          # Allowed values: "running" or "stopped" , state =  we can stop or run the instance state 
   depends_on = [ terraform_data.catalogue ]            # means when terraform_data" "catalogue" configuration is done, 
                                                #  then after "aws_ec2_instance_state" "catalogue" configuration will run and stop the instaance 
 }
 
-# resource allows the creation of an Amazon Machine Image (AMI)
-resource "aws_ami_from_instance" "catalogue" {
+# resource allows the creation of an Amazon Machine Image (AMI)              # AMI brings The Operating System (e.g., Linux, Windows
+resource "aws_ami_from_instance" "catalogue" {                               # Your code, installed software, and system files
   name               = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}"  # roboshop-dev-catalogue-v3-instance-id
   source_instance_id = aws_instance.catalogue.id
   depends_on = [ aws_ec2_instance_state.catalogue ]                # means when "aws_ec2_instance_state" "catalogue" INSTANCE STOPS completely , 
@@ -63,6 +63,7 @@ resource "aws_ami_from_instance" "catalogue" {
   )
 }
 
+# resource allows the creation of an lunch template
 resource "aws_launch_template" "catalogue" {
   name = "${local.common_name}-catalogue"    # form catalogue ami id
 
@@ -98,7 +99,25 @@ resource "aws_launch_template" "catalogue" {
       },
       local.common_tags
     )
-  }
+  }  
+}
 
-  
+resource "aws_lb_target_group" "catalogue" {
+  name     = "${local.common_name}-catalogue"
+  port     = 8080
+  protocol = "HTTP"
+  vpc_id   = local.vpc_id
+  deregistration_delay = 30       # If there are users already connected to that server, the Load Balancer gives them exactly 30 seconds 
+                                  # to finish what they are doing (completing their download, saving their data, etc.).
+
+  health_check {               # {} means here block # target group consist of health check 
+    healthy_threshold = 2
+    interval = 10               # every 10 seconds health check will done
+    matcher = "200-299"
+    path = "/health"           
+    port = 8080
+    protocol = "HTTP"
+    timeout = 5                 # response should come in 5 seconds
+    unhealthy_threshold = 2     #  2 consecutive  health check fails then instance is not in good condition
+  }
 }
