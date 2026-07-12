@@ -118,7 +118,7 @@ resource "aws_security_group_rule" "catalogue_bastion" {
 resource "aws_security_group_rule" "user_backend_alb" {
   type              = "ingress"
   from_port         = 8080
-  to_port           = 8080
+  to_port           = 8080    # Who talks to who: ALB ──► User Service EC2 Instance, Port: 8080   
   protocol          = "tcp"
   source_security_group_id = local.backend_alb_sg_id
   security_group_id = local.user_sg_id
@@ -194,7 +194,7 @@ resource "aws_security_group_rule" "payment_bastion" {
 resource "aws_security_group_rule" "backend_alb_frontend" {
   type              = "ingress"
   from_port         = 80
-  to_port           = 80
+  to_port           = 80                         # Who talks to who: End User ──► ALB , Port: 80 or 443
   protocol          = "tcp"
   source_security_group_id = local.frontend_sg_id
   security_group_id = local.backend_alb_sg_id
