@@ -15,6 +15,7 @@ variable "sg_names" {
         "frontend",
         "frontend_alb",    # frontend_alb = _ is for programming 
         "bastion"          # roboshop-dev = - is for human readability
+        "vpn"
     ]
 }
 
