@@ -316,9 +316,10 @@ resource "aws_security_group_rule" "bastion_my_public_ip" {
   from_port         = 22
   to_port           = 22
   protocol          = "tcp"
-  #cidr_blocks = ["${chomp(data.http.my_public_ip.response_body)}/32"] # to get my public ip_address    # /32 means single ip_address
   cidr_blocks = ["73.18.232.81/32"]   # in our roboshop project giving vpn public ipaddress # in real time we keep elastic IP here so we dont have to change vpn ip addess vry time
-  security_group_id = local.bastion_sg_id
+  # cidr_blocks = ["73.18.232.81/32"]  # i am using this here because i am connecting from my laptop to bastion. not form ec2 instance to  bastion
+  security_group_id = local.bastion_sg_id 
+  #source_security_group_id = local.bastion_sg_id # we use this in real-time for ece to ec2
 } 
 
 # for vpn
