@@ -209,6 +209,14 @@ resource "aws_security_group_rule" "backend_alb_bastion" {
   security_group_id = local.backend_alb_sg_id
 }
 
+resource "aws_security_group_rule" "backend_alb_vpn" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  source_security_group_id = local.vpn_sg_id
+  security_group_id = local.backend_alb_sg_id
+}
 resource "aws_security_group_rule" "backend_alb_catalogue" {
   type              = "ingress"
   from_port         = 80
@@ -292,12 +300,64 @@ resource "aws_security_group_rule" "frontend_alb_http" {           # http for te
   security_group_id = local.frontend_alb_sg_id
 }
 
+# # Bastion
+# resource "aws_security_group_rule" "bastion_my_public_ip" {
+#   type              = "ingress"
+#   from_port         = 22
+#   to_port           = 22
+#   protocol          = "tcp"
+#   cidr_blocks = ["${chomp(data.http.my_public_ip.response_body)}/32"] # to get my public ip_address    # /32 means single ip_address
+#   security_group_id = local.bastion_sg_id
+# } 
+
 # Bastion
 resource "aws_security_group_rule" "bastion_my_public_ip" {
   type              = "ingress"
   from_port         = 22
   to_port           = 22
   protocol          = "tcp"
-  cidr_blocks = ["${chomp(data.http.my_public_ip.response_body)}/32"] # to get my public ip_address    # /32 means single ip_address
+  #cidr_blocks = ["${chomp(data.http.my_public_ip.response_body)}/32"] # to get my public ip_address    # /32 means single ip_address
+  cidr_blocks = ["73.18.232.81"]              # give public ipaddress
   security_group_id = local.bastion_sg_id
+} 
+
+# for vpn
+resource "aws_security_group_rule" "vpn_public_1194" {
+  type              = "ingress"
+  from_port         = 1194
+  to_port           = 1194
+  protocol          = "tcp"
+  cidr_blocks = ["0.0.0.0/0"] # to get my public ip_address    # /32 means single ip_address
+  security_group_id = local.vpn_sg_id
+} 
+
+# for console
+resource "aws_security_group_rule" "vpn_public_943" {
+  type              = "ingress"
+  from_port         = 943
+  to_port           = 943
+  protocol          = "tcp"
+  cidr_blocks = ["0.0.0.0/0"] # to get my public ip_address    # /32 means single ip_address
+  security_group_id = local.vpn_sg_id
+} 
+
+# for console
+resource "aws_security_group_rule" "vpn_public_443" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks = ["0.0.0.0/0"] # to get my public ip_address    # /32 means single ip_address
+  security_group_id = local.vpn_sg_id
+} 
+
+# 
+resource "aws_security_group_rule" "vpn_public_ssh" { # in real TIME we connect ssh to anywhere IP for VPN
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  #cidr_blocks = ["0.0.0.0/0"]  # IN REAL TIME WE GIVE LIKE THIS, SO EVERYONE CAN CONNECT TO THIS 
+  cidr_blocks = ["${chomp(data.http.my_public_ip.response_body)}/32"] # to get my public ip_address    # /32 means single ip_address
+  security_group_id = local.vpn_sg_id
 } 
