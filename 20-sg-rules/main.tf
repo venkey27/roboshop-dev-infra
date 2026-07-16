@@ -317,7 +317,7 @@ resource "aws_security_group_rule" "bastion_my_public_ip" {
   to_port           = 22
   protocol          = "tcp"
   #cidr_blocks = ["${chomp(data.http.my_public_ip.response_body)}/32"] # to get my public ip_address    # /32 means single ip_address
-  cidr_blocks = ["73.18.232.81"]              # give public ipaddress
+  cidr_blocks = ["73.18.232.81/32"]              # give vpn public ipaddress
   security_group_id = local.bastion_sg_id
 } 
 
